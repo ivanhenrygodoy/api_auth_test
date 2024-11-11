@@ -28,9 +28,10 @@ Route::controller(AuthController::class)->group(function (){
 Route::prefix('/mantenimiento-producto')->group(function () {
     Route::get('/search-product-individual/{id}', [MntProductoController::class, 'detalle_producto'])->middleware('auth', 'api');
     Route::get('/index-product', [MntProductoController::class, 'index_producto'])->middleware('auth', 'api');
-    Route::post('/update-product/{id}', [MntProductoController::class, 'actualizar_producto'])->middleware('auth', 'api');
+    Route::put('/update-product/{id}', [MntProductoController::class, 'actualizar_producto'])->middleware('auth', 'api');
     Route::post('/create-product', [MntProductoController::class, 'agregar_producto'])->middleware('auth', 'api');
     Route::put('/change-product/{id}', [MntProductoController::class, 'cambio_estado_producto'])->middleware('auth', 'api');
+    Route::post('/delete-logical-product/{id}', [MntProductoController::class, 'delete_producto'])->middleware('auth', 'api');
 
     Route::post('/agregar-archivo', [MntProductoController::class, 'agregar_archivo'])->middleware('auth', 'api');
     Route::delete('/eliminar-archivo/{id}', [MntProductoController::class, 'eliminar_archivos'])->middleware('auth', 'api');

@@ -22,10 +22,10 @@ class ProductPutRequest extends Request
     public function rules(): array
     {
         return [
-            'id_producto' => ['required', 'integer'],
-            'documento' => ['required'],  // Primero, validar que 'documentos' es un arreglo
-            'documento.*' => ['file', 'mimes:pdf,doc,docx,png,jpeg,jpg'],  // Luego, validar que cada archivo en el arreglo es un archivo válido
-            'nombre_archivo' => ['required', 'string'],
-        ];;
+           'id_categoria_producto' => ['integer'],
+            'id_establecimiento_origen' => ['integer'],
+            'nombre_archivo' => ['string'],
+            'codigo' => ['string'],
+        ];
     }
 }

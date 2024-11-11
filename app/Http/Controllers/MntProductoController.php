@@ -14,6 +14,7 @@ use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
@@ -142,22 +143,12 @@ class MntProductoController extends Controller
     
                 Storage::disk('documento-regulacion-producto')->put($nombreDoc, file_get_contents($documento));
     
-                // if (!Storage::disk('documento-regulacion-producto')->exists($nombreDoc)) {
-                //     return ApiResponse::error('Error al guardar el documento', 500);
-                // }
-    
                 $fileName = $nombresDocumentos[$index];
     
                 $existingDocumento = MntDocumentoCertificacion::where('nombre_archivo', $fileName)->first();
     
                 if ($existingDocumento) {
-                    return Response()->json([
-                        'status' => Response::HTTP_BAD_REQUEST,
-                        'data' => [],
-                        'errors' => [
-                            'message' => ['Ya existe un archivo con el mismo nombre.']
-                        ]
-                    ], Response::HTTP_BAD_REQUEST);                
+                    throw new \Exception('Ya existe un archivo con el nombre: ' . $fileName );
                 }
     
                 $nuevoDocumento = new MntDocumentoCertificacion();
@@ -174,14 +165,11 @@ class MntProductoController extends Controller
             }
         } catch (Exception $e) {
             DB::rollBack();
-    
-            return Response()->json([
-                'status' => Response::HTTP_INTERNAL_SERVER_ERROR,
-                'data' => [],
-                'errors' => [
-                    'message' => $e->getMessage()
-                ]
-            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+
+            Log::error("Error al procesar los documentos de la solicitud: " . $e->getMessage());
+            Log::error("Documento id: " . $nombreDoc);
+            throw $e;
+            return ApiResponse::error('Error al procesar los documentos de la solicitud', 500);
         }
     }
     
@@ -220,7 +208,7 @@ class MntProductoController extends Controller
         return response($listProduct, Response::HTTP_OK);
     }
 
-    public function actualizar_producto(ProductPutRequest $request, $idProducto)
+    public function actualizar_producto(Request $request, $idProducto)
     {
         try {
             $updateProducto = MntProducto::where('id', $idProducto)->first();
@@ -465,6 +453,46 @@ class MntProductoController extends Controller
             DB::rollback();
             return ApiResponse::error('Error al eliminar el documento', 500);
         }
+    }
+
+    public function delete_producto($idProducto) 
+    {
+        DB::beginTransaction();
+        try {
+            $busqProducto = MntProducto::where('id', $idProducto)->first();
+            if(!$busqProducto) {
+                return response()->json(
+                    [
+                        'status' => '404',
+                        'data' => [],
+                        'errors' => [
+                            'message' => 'Ocurrio un problema, no se encuentra el registro.'
+                        ]
+                    ],
+                    404
+                );
+            }
+
+            $busqProducto->delete();
+
+            DB::commit();
+
+            return response()->json([
+                'status' => Response::HTTP_OK,
+                'data' => ['message' => 'El producto se ha eliminado correctamente'],
+                'errors' => []
+            ], Response::HTTP_OK);
+
+        } catch (Exception $e) {
+            DB::rollBack();
+    
+            return response()->json([
+                'status' => Response::HTTP_INTERNAL_SERVER_ERROR,
+                'data' => [],
+                'errors' => ['message' => $e->getMessage()]
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+
     }
     
 

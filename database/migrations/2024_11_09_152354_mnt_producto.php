@@ -20,6 +20,7 @@ return new class extends Migration
             $table->boolean('activo')->default(true);
             $table->timestamp('created_at')->useCurrent();
             $table->timestamp('updated_at')->nullable();
+            $table->softDeletes();
 
             $table->foreign('id_establecimiento_origen')->references('id')->on('ctl_establecimiento_origen')
             ->onUpdate('cascade')
