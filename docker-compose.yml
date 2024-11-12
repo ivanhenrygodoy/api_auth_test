@@ -1,0 +1,53 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: laravel-app
+    container_name: laravel-app
+    restart: unless-stopped
+    working_dir: /var/www
+    ports:
+      - "8086:8000"
+    entrypoint: "php artisan serve --host=laravel-app --port=8000"
+    volumes:
+      - .:/var/www
+      - ./php/local.ini:/usr/local/etc/php/conf.d/local.ini
+    networks:
+      - laravel
+
+  # Servicio de Nginx
+  # webserver:
+  #   image: nginx:latest
+  #   container_name: nginx-server
+  #   restart: unless-stopped
+  #   ports:
+  #     - "8086:80"  # Cambia el puerto si es necesario
+  #   volumes:
+  #     - .:/var/www
+  #     - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+  #   depends_on:
+  #     - app
+  #   networks:
+  #     - laravel
+
+  db:
+    image: postgres:16
+    container_name: postgres-bd
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: laravel
+      POSTGRES_PASSWORD: secret
+      POSTGRES_DB: laravel_db
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - laravel
+
+networks:
+  laravel:
+
+volumes:
+  postgres-data:
