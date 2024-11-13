@@ -38,9 +38,9 @@ services:
     container_name: postgres-bd
     restart: unless-stopped
     environment:
-      POSTGRES_USER: laravel
-      POSTGRES_PASSWORD: secret
-      POSTGRES_DB: laravel_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: mantenimiento_producto_bd
     volumes:
       - postgres-data:/var/lib/postgresql/data
     networks:
